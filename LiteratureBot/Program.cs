@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using LiteratureBot.classes;
+using System.Data.SqlClient;
 
 namespace LiteratureBot
 {
@@ -12,7 +13,7 @@ namespace LiteratureBot
         static void Main(string[] args)
         {
             Bot bot = new Bot();
-            bot.StartBot();
+            bot.StartBot(); // Запуск бота
             while (true) { }
         }
     }

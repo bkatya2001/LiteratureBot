@@ -1,4 +1,5 @@
-﻿using System;
+﻿using LiteratureBot.database;
+using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Linq;
@@ -15,11 +16,10 @@ namespace LiteratureBot.classes
         public static VkNet.VkApi vkApi; // API ВКонтакте
         private LongPollServerResponse response; // История событий сообщества
         BackgroundWorker backgroundMessages; // Отдельный поток
-        //BotBMSTUDataSet database;
-        //Admin admin;
-        //User user;
-        //Guest guest;
-        //static public string password = "password";
+        public static LiteratureBotDataSet database; // Экземпляр класса базы данных
+        Admin admin; // Экземпляр класса администраторов
+        User user; // Экземпляр класса пользователей
+        static public string password = "password"; // Пароль для получения прав администратора
         private Random r; // Рандомное значение
 
         // Конструктор
@@ -28,12 +28,11 @@ namespace LiteratureBot.classes
             vkApi = new VkNet.VkApi();
             vkApi.RequestsPerSecond = 20; // Ограничение на количество запросов в секунду
             r = new Random();
-            //database = new BotBMSTUDataSet();
+            database = new LiteratureBotDataSet();
             backgroundMessages = new BackgroundWorker();
             backgroundMessages.DoWork += new DoWorkEventHandler(DoBackgroundWork); // Обработчик фоновых задач
-            //admin = new Admin();
-            //user = new User();
-            //guest = new Guest();
+            admin = new Admin();
+            user = new User();
         }
 
         // Инициализация бота
@@ -71,23 +70,24 @@ namespace LiteratureBot.classes
         // Обработчик команд
         void performCommand(VkNet.Model.Message message)
         {
-            List<MessagesSendParams> messages = new List<MessagesSendParams>();
-            messages.Add(new MessagesSendParams
+            if (database.IsAdmin(message.FromId)) SendMessages(admin.PerformCommand(message));
+            else
             {
-                UserId = message.FromId,
-                Message = "Вы написали: " + message.Text,
-                Attachments = null,
-                //Keyboard = CreateKeyboard(new List<string> { "Список команд" })
-            });
-            /*if (database.IsAdmin(message.FromId)) SendMessages(admin.PerformCommand(message));
-            else if (database.IsUser(message.FromId)) SendMessages(user.PerformCommand(message));
-            else if (message.Text == password)
-            {
-                database.Add(message.FromId);
-                SendMessages(admin.PerformCommand(message));
+                database.CheckAndAddUser(message.FromId);
+                if (message.Text == password)
+                {
+                    database.ChangeStatus(message.FromId, 1);
+                    SendMessages(new List<MessagesSendParams> {
+                        new MessagesSendParams {
+                            UserId = message.FromId,
+                            Message = "Вам доступны функции администратора. Добро пожаловать!",
+                            Attachments = null,
+                            Keyboard = admin.CreateKeyboard(admin.CommandsToList())
+                         }
+                    });
+                }
+                else SendMessages(user.PerformCommand(message));
             }
-            else SendMessages(guest.PerformCommand(message));*/
-            SendMessages(messages); // Отправка сообщения
         }
 
         // Отправка сообщений
