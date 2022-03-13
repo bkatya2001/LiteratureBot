@@ -55,8 +55,13 @@ namespace LiteratureBot.database
                 using (SqlCommand comm = conn.CreateCommand())
                 {
                     comm.CommandType = System.Data.CommandType.Text;
-                    comm.CommandText = "IF (SELECT COUNT(*) FROM Users WHERE id_vk = @id_vk) = 0 INSERT INTO Users VALUES (@id_vk, 0);";
+                    comm.CommandText = "IF (SELECT COUNT(*) FROM Users WHERE id_vk = @id_vk) = 0 BEGIN " +
+                        "INSERT INTO Users VALUES(@id_vk, 0) " +
+                        "IF(SELECT COUNT(*) FROM Statistics_data WHERE date = @date) = 0 " +
+                        "INSERT INTO Statistics_data VALUES(0, 1, 0, @date, 0) " +
+                        "ELSE UPDATE Statistics_data SET user_count = user_count + 1 WHERE date = @date END;";
                     comm.Parameters.AddWithValue("@id_vk", id_vk);
+                    comm.Parameters.AddWithValue("@date", DateTime.Now.ToShortDateString());
                     conn.Open();
                     comm.ExecuteNonQuery();
                     conn.Close();
@@ -88,8 +93,9 @@ namespace LiteratureBot.database
                 using (SqlCommand comm = conn.CreateCommand())
                 {
                     comm.CommandType = System.Data.CommandType.Text;
-                    comm.CommandText = "SELECT H.data_time, R.request, R.result, R.similar FROM History H, Requests R WHERE id_user IN " +
-                        "(SELECT id FROM Users WHERE id_vk = @id_vk); ";
+                    comm.CommandText = "SELECT R.request, R.result, R.similar, H.data_time FROM Requests R " +
+                        "INNER JOIN History H ON R.id = H.id_request WHERE H.id_user IN " +
+                        "(SELECT id FROM Users WHERE id_vk = @id_vk);";
                     comm.Parameters.AddWithValue("@id_vk", id_vk);
                     conn.Open();
                     SqlDataReader r = comm.ExecuteReader();
@@ -98,10 +104,10 @@ namespace LiteratureBot.database
                         StringBuilder stringBuilder = new StringBuilder();
                         while (r.Read())
                         {
-                            stringBuilder.AppendLine(r[0].ToString());
-                            stringBuilder.AppendLine("Запрос: " + "'" + r[1].ToString() + "'");
-                            stringBuilder.AppendLine("Результат: " + r[2].ToString());
-                            stringBuilder.AppendLine("Похожие: " + r[3].ToString());
+                            stringBuilder.AppendLine(r[3].ToString());
+                            stringBuilder.AppendLine("Запрос: " + "'" + r[0].ToString() + "'");
+                            stringBuilder.Append("Результат:\n" + r[1].ToString());
+                            stringBuilder.AppendLine("Похожие:\n" + r[2].ToString());
                             result.Add(stringBuilder.ToString());
                             stringBuilder.Clear();
                         }
@@ -128,6 +134,52 @@ namespace LiteratureBot.database
                     conn.Close();
                 }
             }
+        }
+
+        public List<string> GetRates(int first_rate, int second_rate)
+        {
+            List<string> result = new List<string>();
+            int count = first_rate;
+            SqlDataReader reader;
+            using (SqlConnection conn = new SqlConnection(connectionString))
+            {
+                using (SqlCommand comm = conn.CreateCommand())
+                {
+                    comm.CommandType = System.Data.CommandType.Text;
+                    comm.CommandText = "SELECT COUNT(*) FROM Rating WHERE rating = @rating;";
+                    while (count - second_rate != 1)
+                    {
+                        comm.Parameters.AddWithValue("@rating", count);
+                        conn.Open();
+                        reader = comm.ExecuteReader();
+                        if (reader.HasRows)
+                        {
+                            while (reader.Read())
+                            {
+                                result.Add("Всего оценок '" + count.ToString() + "': " + reader[0].ToString());
+                            }
+                        }
+                        conn.Close();
+                        comm.Parameters.Clear();
+                        count++;
+                    }
+                    comm.CommandText = "SELECT comment FROM Rating WHERE rating >= @first_rate AND rating <= @second_rate;";
+                    comm.Parameters.AddWithValue("@first_rate", first_rate);
+                    comm.Parameters.AddWithValue("@second_rate", second_rate);
+                    conn.Open();
+                    reader = comm.ExecuteReader();
+                    if (reader.HasRows)
+                    {
+                        result.Add("Комментарии:");
+                        while (reader.Read())
+                        {
+                            result.Add(reader[0].ToString());
+                        }
+                    }
+                    conn.Close();
+                }
+            }
+            return result;
         }
     }
 }

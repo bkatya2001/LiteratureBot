@@ -7,6 +7,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "LiteratureBot", "Literature
 EndProject
 Project("{54435603-DBB4-11D2-8724-00A0C9A8B90C}") = "LiteratureBotSetup", "LiteratureBotSetup\LiteratureBotSetup.vdproj", "{1613AB4B-F4A4-48B7-A3CA-34B28CB20B91}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Pullenti.Net", "Libs\PullentiCSharp\Pullenti\Pullenti.Net.csproj", "{28D50410-B4A5-48AD-B441-6E3F575CD282}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -19,6 +21,10 @@ Global
 		{C8573063-2F61-4B2A-BD60-65183A022442}.Release|Any CPU.Build.0 = Release|Any CPU
 		{1613AB4B-F4A4-48B7-A3CA-34B28CB20B91}.Debug|Any CPU.ActiveCfg = Debug
 		{1613AB4B-F4A4-48B7-A3CA-34B28CB20B91}.Release|Any CPU.ActiveCfg = Release
+		{28D50410-B4A5-48AD-B441-6E3F575CD282}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{28D50410-B4A5-48AD-B441-6E3F575CD282}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{28D50410-B4A5-48AD-B441-6E3F575CD282}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{28D50410-B4A5-48AD-B441-6E3F575CD282}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

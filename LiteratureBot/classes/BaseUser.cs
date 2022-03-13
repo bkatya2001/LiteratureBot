@@ -78,8 +78,8 @@ namespace LiteratureBot.classes
                 for (int i = 0; i < buttons.Count; i++)
                 {
                     if (i != 0 && i % rowCount == 0) kb.AddLine();
-                    if (buttons[i].ToLower() == "начать" || buttons[i].ToLower() == "да") kb.AddButton(buttons[i], null, KeyboardButtonColor.Positive, "text");
-                    else if (buttons[i].ToLower() == "стоп" || buttons[i].ToLower() == "нет" || buttons[i].ToLower() == "отменить") kb.AddButton(buttons[i], null, KeyboardButtonColor.Negative, "text");
+                    if (buttons[i].ToLower() == "ознакомиться" || buttons[i].ToLower() == "да" || buttons[i].ToLower() == "подобрать произведение") kb.AddButton(buttons[i], null, KeyboardButtonColor.Positive, "text");
+                    else if (buttons[i].ToLower() == "нет" || buttons[i].ToLower() == "отменить") kb.AddButton(buttons[i], null, KeyboardButtonColor.Negative, "text");
                     else kb.AddButton(buttons[i], null);
                 }
             }
@@ -132,35 +132,6 @@ namespace LiteratureBot.classes
             {
                 return false;
             }
-        }
-
-        // Метод удаления диалога по id
-        protected void DeleteThreadByUserId(long? id)
-        {
-            foreach (Thread t in threads)
-            {
-                if (t.id == id) threads.Remove(t);
-            }
-        }
-
-        // Метод выбора диалога по id
-        protected Thread FindThreadById(long? id)
-        {
-            foreach (Thread t in threads)
-            {
-                if (t.id == id) return t;
-            }
-            return null;
-        }
-
-        // Метод определения русского текста
-        protected bool IsRusText(string text)
-        {
-            Regex r = new Regex(@"[А-Яа-я]+");
-            text = text.Replace(" ", "").Replace(",", "").Replace(".", "").Replace("-", "");
-            text = text.Remove(r.Match(text).Index, r.Match(text).Value.Length);
-            if (text.Length == 0) return true;
-            return false;
         }
 
         // Метод для формирования нескольких сообщений

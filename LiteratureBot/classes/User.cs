@@ -29,6 +29,85 @@ namespace LiteratureBot.classes
         private List<MessagesSendParams> GetLiterature(VkNet.Model.Message message, Thread thread)
         {
             List<MessagesSendParams> messages = new List<MessagesSendParams>();
+            MessageKeyboard keyboard = null;
+            StringBuilder text = new StringBuilder();
+            switch (thread.step)
+            {
+                case 0:
+                    text.Append("Расскажите, о чём Вы хотите прочитать");
+                    keyboard = CreateKeyboard(new List<string> { "Отменить" });
+                    thread.step++;
+                    break;
+                case 1:
+                    if (message.Text == "Отменить")
+                    {
+                        text.Append("Команда отменена");
+                    }
+                    else
+                    {
+                        Bot.database.UpdateRequestsCount();
+                        LanguageProcessor lan_proc = new LanguageProcessor();
+                        List<List<Book>> books = lan_proc.ProcessText(message.Text);
+                        if (books[0] == null && books[1] == null)
+                        {
+                            text.Append("По Вашему запросу ничего не найдено.");
+                            keyboard = CreateKeyboard(CommandsToList());
+                            threads.Remove(thread);
+                        }
+                        else
+                        {
+                            if (books[0] == null)
+                            {
+                                text.AppendLine("По Вашему запросу ничего не найдено. Хотите ознакомиться с похожим?");
+                                thread.step++;
+                                thread.parametr = books[1];
+                                keyboard = CreateKeyboard(new List<string> { "Ознакомиться", "Отменить" });
+                            }
+                            else
+                            {
+                                text.AppendLine("Запросу соответствуют следующие произведения:");
+                                for (int i = 0; i < books[0].Count; i++)
+                                {
+                                    text.AppendLine((i + 1).ToString() + ") " + books[0][i].name + " - " + books[0][i].author);
+                                    keyboard = CreateKeyboard(CommandsToList());
+                                }
+                                if (books[1].Count != 0)
+                                {
+                                    text.AppendLine().AppendLine("Хотите ознакомиться с похожим?");
+                                    thread.step++;
+                                    thread.parametr = books[1];
+                                    keyboard = CreateKeyboard(new List<string> { "Ознакомиться", "Отменить" });
+                                }
+                                else threads.Remove(thread);
+                            }
+                        }
+                        Bot.database.AddRequest(books, message.Text, message.FromId);
+                    }
+                    break;
+                case 2:
+                    if (message.Text == "Отменить")
+                    {
+                        text.Append("Команда отменена");
+                    }
+                    else
+                    {
+                        List<Book> same_books = (List<Book>)thread.parametr;
+                        for (int i = 0; i < same_books.Count; i++)
+                        {
+                            text.AppendLine((i + 1).ToString() + ") " + same_books[i].name + " - " + same_books[i].author);
+                        }
+                    }
+                    threads.Remove(thread);
+                    keyboard = CreateKeyboard(CommandsToList());
+                    break;
+            }
+            messages.Add(new MessagesSendParams
+            {
+                UserId = message.FromId,
+                Message = text.ToString(),
+                Attachments = null,
+                Keyboard = keyboard
+            });
             return messages;
         }
 
@@ -59,7 +138,7 @@ namespace LiteratureBot.classes
             {
                 case 0:
                     text = "Вы уверены, что хотите удалить всю историю запросов? Введите 'Да' для удаления";
-                    keyboard = CreateKeyboard(new List<string> { "Да" });
+                    keyboard = CreateKeyboard(new List<string> { "Да", "Нет" });
                     thread.step++;
                     break;
                 case 1:
@@ -94,11 +173,17 @@ namespace LiteratureBot.classes
             {
                 case 0:
                     text = "Введите оценку по шкале от 1 до 5, где 1 - 'Ужасно', а 5 - 'Отлично'";
-                    keyboard = CreateKeyboard(new List<string> { "5", "4", "3", "2", "1" });
+                    keyboard = CreateKeyboard(new List<string> { "5", "4", "3", "2", "1", "Отменить" });
                     thread.step++;
                     break;
                 case 1:
-                    if (new List<string> { "1", "2", "3", "4", "5" }.Contains(message.Text))
+                    if (message.Text == "Отменить")
+                    {
+                        text = "Команда отменена";
+                        threads.Remove(thread);
+                        keyboard = CreateKeyboard(CommandsToList());
+                    }
+                    else if (new List<string> { "1", "2", "3", "4", "5" }.Contains(message.Text))
                     {
                         text = "Вы можете дополнить отзыв комментарием. Для этого отправьте любое сообщение";
                         keyboard = CreateKeyboard(new List<string> { "Без комментария" });
@@ -110,7 +195,7 @@ namespace LiteratureBot.classes
                         if (thread.HasLives())
                         {
                             text = "Оценить бота можно по шкале от 1 до 5. Повторите ввод снова";
-                            keyboard = CreateKeyboard(new List<string> { "5", "4", "3", "2", "1" });
+                            keyboard = CreateKeyboard(new List<string> { "5", "4", "3", "2", "1", "Отменить" });
                         }
                         else
                         {
@@ -123,6 +208,7 @@ namespace LiteratureBot.classes
                 case 2:
                     int rating = Convert.ToInt32(thread.parametr.ToString());
                     Bot.database.AddRating(message.FromId, rating, message.Text);
+                    Bot.database.UpdateRating(rating);
                     threads.Remove(thread);
                     text = "Спасибо за Вашу оценку!";
                     keyboard = CreateKeyboard(CommandsToList());

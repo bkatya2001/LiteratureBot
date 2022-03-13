@@ -75,12 +75,15 @@
   <ItemGroup>
     <Compile Include="classes\Admin.cs" />
     <Compile Include="classes\BaseUser.cs" />
+    <Compile Include="classes\Book.cs" />
     <Compile Include="classes\Bot.cs" />
     <Compile Include="classes\Command.cs" />
+    <Compile Include="classes\LanguageProcessor.cs" />
     <Compile Include="classes\Thread.cs" />
     <Compile Include="classes\User.cs" />
     <Compile Include="database\UserDB.cs" />
     <Compile Include="database\CommonDB.cs" />
+    <Compile Include="database\WordDB.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
@@ -90,6 +93,12 @@
   </ItemGroup>
   <ItemGroup>
     <Folder Include="assets\" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\Libs\PullentiCSharp\Pullenti\Pullenti.Net.csproj">
+      <Project>{28d50410-b4a5-48ad-b441-6e3f575cd282}</Project>
+      <Name>Pullenti.Net</Name>
+    </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

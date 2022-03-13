@@ -12,6 +12,7 @@ namespace LiteratureBot
     {
         static void Main(string[] args)
         {
+            Pullenti.Sdk.InitializeAll();
             Bot bot = new Bot();
             bot.StartBot(); // Запуск бота
             while (true) { }

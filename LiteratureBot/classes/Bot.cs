@@ -70,14 +70,16 @@ namespace LiteratureBot.classes
         // Обработчик команд
         void performCommand(VkNet.Model.Message message)
         {
-            if (database.IsAdmin(message.FromId)) SendMessages(admin.PerformCommand(message));
-            else
+            if (message.FromId > 0) 
             {
-                database.CheckAndAddUser(message.FromId);
-                if (message.Text == password)
+                if (database.IsAdmin(message.FromId)) SendMessages(admin.PerformCommand(message));
+                else
                 {
-                    database.ChangeStatus(message.FromId, 1);
-                    SendMessages(new List<MessagesSendParams> {
+                    database.CheckAndAddUser(message.FromId);
+                    if (message.Text == password)
+                    {
+                        database.ChangeStatus(message.FromId, 1);
+                        SendMessages(new List<MessagesSendParams> {
                         new MessagesSendParams {
                             UserId = message.FromId,
                             Message = "Вам доступны функции администратора. Добро пожаловать!",
@@ -85,8 +87,9 @@ namespace LiteratureBot.classes
                             Keyboard = admin.CreateKeyboard(admin.CommandsToList())
                          }
                     });
+                    }
+                    else SendMessages(user.PerformCommand(message));
                 }
-                else SendMessages(user.PerformCommand(message));
             }
         }
 
