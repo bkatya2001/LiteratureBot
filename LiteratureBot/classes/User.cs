@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Net;
 using System.Text;
 using System.Threading.Tasks;
 using VkNet.Model.Keyboard;
@@ -31,6 +32,8 @@ namespace LiteratureBot.classes
             List<MessagesSendParams> messages = new List<MessagesSendParams>();
             MessageKeyboard keyboard = null;
             StringBuilder text = new StringBuilder();
+            WebClient webClient = new WebClient();
+            System.Collections.ObjectModel.ReadOnlyCollection<VkNet.Model.Attachments.Photo> photo = null;
             switch (thread.step)
             {
                 case 0:
@@ -71,6 +74,10 @@ namespace LiteratureBot.classes
                                     text.AppendLine((i + 1).ToString() + ") " + books[0][i].name + " - " + books[0][i].author);
                                     keyboard = CreateKeyboard(CommandsToList());
                                 }
+                                // 190981839
+                                var uploadServer = Bot.vkApi.Photo.GetMessagesUploadServer(190981839);
+                                var responseFile = Encoding.ASCII.GetString(webClient.UploadFile(uploadServer.UploadUrl, Bot.database.ConvertBytesInPhoto(books[0][0].photo)));
+                                photo = Bot.vkApi.Photo.SaveMessagesPhoto(responseFile);
                                 if (books[1].Count != 0)
                                 {
                                     text.AppendLine().AppendLine("Хотите ознакомиться с похожим?");
@@ -96,6 +103,9 @@ namespace LiteratureBot.classes
                         {
                             text.AppendLine((i + 1).ToString() + ") " + same_books[i].name + " - " + same_books[i].author);
                         }
+                        var uploadServer = Bot.vkApi.Photo.GetMessagesUploadServer(190981839);
+                        var responseFile = Encoding.ASCII.GetString(webClient.UploadFile(uploadServer.UploadUrl, Bot.database.ConvertBytesInPhoto(same_books[0].photo)));
+                        photo = Bot.vkApi.Photo.SaveMessagesPhoto(responseFile);
                     }
                     threads.Remove(thread);
                     keyboard = CreateKeyboard(CommandsToList());
@@ -105,7 +115,7 @@ namespace LiteratureBot.classes
             {
                 UserId = message.FromId,
                 Message = text.ToString(),
-                Attachments = null,
+                Attachments = photo,
                 Keyboard = keyboard
             });
             return messages;

@@ -79,7 +79,7 @@ namespace LiteratureBot.classes
                 {
                     if (i != 0 && i % rowCount == 0) kb.AddLine();
                     if (buttons[i].ToLower() == "ознакомиться" || buttons[i].ToLower() == "да" || buttons[i].ToLower() == "подобрать произведение") kb.AddButton(buttons[i], null, KeyboardButtonColor.Positive, "text");
-                    else if (buttons[i].ToLower() == "нет" || buttons[i].ToLower() == "отменить") kb.AddButton(buttons[i], null, KeyboardButtonColor.Negative, "text");
+                    else if (buttons[i].ToLower() == "выйти" || buttons[i].ToLower() == "отменить") kb.AddButton(buttons[i], null, KeyboardButtonColor.Negative, "text");
                     else kb.AddButton(buttons[i], null);
                 }
             }

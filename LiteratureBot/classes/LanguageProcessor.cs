@@ -110,6 +110,8 @@ namespace LiteratureBot.classes
 
         public List<List<Book>> ProcessText(string text)
         {
+            bool withPhoto = false;
+
             List<Book> main_books = new List<Book>();
             List<Book> same_books = new List<Book>();
 
@@ -188,9 +190,11 @@ namespace LiteratureBot.classes
             else
             {
                 main_books = null;
+                withPhoto = true;
                 foreach (int k in types_def.Keys)
                 {
-                    same_books.Add(Bot.database.GetBook(k));
+                    same_books.Add(Bot.database.GetBook(k, withPhoto));
+                    withPhoto = false;
                 }
                 return new List<List<Book>> { main_books, same_books };
             }
@@ -201,11 +205,15 @@ namespace LiteratureBot.classes
                 {
                     if (types_defs_adj_age.ContainsKey(k))
                     {
-                        main_books.Add(Bot.database.GetBook(k));
+                        if (main_books.Count == 0) withPhoto = true;
+                        else withPhoto = false;
+                        main_books.Add(Bot.database.GetBook(k, withPhoto));
                     }
                     else
                     {
-                        same_books.Add(Bot.database.GetBook(k));
+                        if (same_books.Count == 0) withPhoto = true;
+                        else withPhoto = false;
+                        same_books.Add(Bot.database.GetBook(k, withPhoto));
                     }
                 }
                 return new List<List<Book>> { main_books, same_books };
@@ -213,9 +221,11 @@ namespace LiteratureBot.classes
             else
             {
                 main_books = null;
+                withPhoto = true;
                 foreach (int k in types_defs_adj.Keys)
                 {
-                    same_books.Add(Bot.database.GetBook(k));
+                    same_books.Add(Bot.database.GetBook(k, withPhoto));
+                    withPhoto = false;
                 }
                 return new List<List<Book>> { main_books, same_books };
             }

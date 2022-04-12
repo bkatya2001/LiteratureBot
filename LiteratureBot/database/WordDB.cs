@@ -1,15 +1,24 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Data.SqlClient;
-using System.Linq;
+using System.IO;
 using System.Text;
-using System.Threading.Tasks;
 using LiteratureBot.classes;
+using System.Drawing;
 
 namespace LiteratureBot.database
 {
     partial class LiteratureBotDataSet
     {
+        public string ConvertBytesInPhoto(byte[] bytes)
+        {
+            MemoryStream ms = new MemoryStream(bytes);
+            Image newImage = Image.FromStream(ms);
+            string path = Environment.CurrentDirectory.Remove(Environment.CurrentDirectory.IndexOf("LiteratureBot")) + "LiteratureBot\\LiteratureBot\\assets\\image.jpg";
+            newImage.Save(path, System.Drawing.Imaging.ImageFormat.Jpeg);
+            return path;
+        }
+
         public List<int> GetWordsId(List<string> words)
         {
             List<int> result = new List<int>();
@@ -176,7 +185,7 @@ namespace LiteratureBot.database
             return result;
         }
 
-        public Book GetBook(int id)
+        public Book GetBook(int id, bool withPhoto)
         {
             string name = "";
             string author = "";
@@ -196,7 +205,8 @@ namespace LiteratureBot.database
                         {
                             name = Convert.ToString(r[0]);
                             author = Convert.ToString(r[1]);
-                            photo = null;
+                            if (withPhoto) photo = (byte[])r[2];
+                            else photo = null;
                         }
                     }
                     conn.Close();
