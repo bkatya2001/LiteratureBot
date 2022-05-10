@@ -21,6 +21,7 @@ namespace LiteratureBot.classes
         User user; // Экземпляр класса пользователей
         static public string password = "password"; // Пароль для получения прав администратора
         private Random r; // Рандомное значение
+        public static string token;
 
         // Конструктор
         public Bot()
@@ -47,7 +48,7 @@ namespace LiteratureBot.classes
                     vkApi.Authorize(new ApiAuthParams
                     {
                         Settings = scope,
-                        AccessToken = "51c90eda4c95f2343ea557cc47fdd98246e52f22eb71a3f94efbd0bbec3a8ae2683b36c93942bc3cf6627" // Уникальный токен
+                        AccessToken = token // Уникальный токен
                     });
                 }
                 catch { }

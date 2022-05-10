@@ -10,7 +10,7 @@ namespace LiteratureBot.database
 {
     partial class LiteratureBotDataSet
     {
-        private string connectionString = "Data Source=LAPTOP-K1DGUPRH\\SQLEXPRESS;Initial Catalog=LiteratureBot;Integrated Security=True";
+        public static string connectionString;
 
         // Получение статистических данных
         public string GetStatistics(string date)
